@@ -8,10 +8,13 @@ import chardet
 i = 0
 
 #Declaring paths for the folders to be compared:
-path_start = '/mnt/c/Users/TAGW0JH/Desktop/ns-allinone-3.34/ns-3.34/src/' #running through wsl, hence linux format of path used. For running through cmd, use Windows path format.
-path2_start = '/mnt/c/Users/TAGW0JH/Desktop/ns-3_c-v2x-master/src/'
+path_start = '/mnt/c/Users/User/folder/' #running through wsl, hence linux format of path used. For running through cmd, use Windows path format.
+path2_start = '/mnt/c/Users/User/folder2/'
 
+#Making list of folder names
 folders_src=os.listdir(path_start)
+
+#add the sub-folders that are to be compared
 y = ["helper", "model", "test"]
 
 for a in folders_src:
