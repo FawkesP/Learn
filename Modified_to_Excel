@@ -1,0 +1,94 @@
+#importing xlsx writer library for preparing Excel sheet:
+import xlsxwriter
+#importing os for required change directory commands:
+import os
+
+import chardet
+
+i = 0
+
+#Declaring paths for the folders to be compared:
+path_start = '/mnt/c/Users/TAGW0JH/Desktop/ns-allinone-3.34/ns-3.34/src/' #running through wsl, hence linux format of path used. For running through cmd, use Windows path format.
+path2_start = '/mnt/c/Users/TAGW0JH/Desktop/ns-3_c-v2x-master/src/'
+
+folders_src=os.listdir(path_start)
+y = ["helper", "model", "test"]
+
+for a in folders_src:
+
+    #Preparing the name for workbooks
+    workbook_partname='Comparison_'+a
+
+    #Naming the directory for check whether it exists or not
+    dir=path_start+a+"/"
+    dir2=path2_start+a+"/"
+
+    for b in y:
+        
+        if os.path.exists(dir+b) and os.path.exists(dir2+b):
+            workbook_name=workbook_partname+"_"+b+".xlsx"
+
+            # Creating a Workbook and a sheet
+            Workbook = xlsxwriter.Workbook(workbook_name)
+            Sheet = Workbook.add_worksheet()
+
+            #Saving current directory as home:
+            home = os.getcwd()
+
+            path = dir+b+"/" #running through wsl, hence linux format of path used. For running through cmd, use Windows path format.
+            path2 = dir2+b+"/"
+
+            #Creating list of files
+            files = os.listdir(path)
+            files2 = os.listdir(path2)
+
+            #Creating headers for excel sheet
+            Sheet.write("A1", "Original Model")
+            Sheet.write("B1", "Eckermann_Mode4")
+            Sheet.write("E1", "Headers with Same Names")
+            Sheet.write("F1", "Modified in Eckermann Model or not")
+
+            #Listing and printing all the files in Folder 1 in an Excel Column
+            for item in range(len(files)):
+                Sheet.write(item+1, 0, files[item])
+
+            #Listing and printing all the files in Folder 2 in an Excel Column
+            for item in range(len(files2)):
+                Sheet.write(item+1, 1, files2[item])
+
+            #Compare files  using intersection method:      
+            both = set(files).intersection(files2)
+            #Finding the indices of the corresponding intersecting files from folder 1 and folder 2:
+            indices_files = [files.index(x) for x in both]
+            indices_files2 = [files2.index(x) for x in both]
+
+            #Opening each intersecting file and comparing the contents to find modifications:
+            for item in range(len(both)):
+                file = files[indices_files[item]]
+                
+                file2 = files2[indices_files2[item]]
+                
+                Sheet.write(item+1, 4, files[indices_files[item]])
+                os.chdir(path)
+                if os.path.isfile(file) and os.path.isfile(file2):
+                    with open(file, 'r', errors="replace") as file_1:
+                        os.chdir(path2)
+                        with open(file2, 'r', errors="replace") as file_2:
+                            for i in range(1000) :
+                                i +=1
+                                file_1_line = file_1.readline()
+                                file_2_line = file_2.readline()
+                                
+                                if file_1_line != file_2_line:
+                                    Sheet.write(item+1, 5, "Modified")
+                                else:
+                                    Sheet.write(item+1, 5, "Same as Original")
+                        file_2.close()
+                    file_1.close()
+                    
+
+            #Retrun to directory where the program is stored to get output file in same folder:
+            os.chdir(home)
+
+            #Close the output file and save:    
+            Workbook.close()
